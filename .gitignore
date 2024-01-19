@@ -1,0 +1,43 @@
+# system file
+.DS_Store
+.idea/
+__pycache__/
+
+# setuptool
+*.egg-info
+
+# raw data
+dataset/
+data/
+media/
+param/
+build/
+output*/
+temp/
+
+# binary file
+# *.png
+# *.jpg
+# *.gif
+# *.mp4
+*.mov
+*.pdf
+
+# latex related
+build/
+*.aux
+*.log
+*.nav
+*.out
+*.snm
+*.toc
+*.synctex.gz
+*.toc.vrb
+*.vrb
+*.bbl
+*.bcf
+*.run.xml
+*.blg
+*cls
+*xdy
+*gz
