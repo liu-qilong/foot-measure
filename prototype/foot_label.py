@@ -6,7 +6,7 @@ crave.landmarks_labelling(
     start = 1,
     end = 5,
     stride = 1,
-    point_names = [f'P{idx + 1}' for idx in range(3)],
+    point_names = [f'P{idx + 1}' for idx in range(10)],
     use_texture = False,
     export_folder = 'prototype/output',
     export_name = 'test'
