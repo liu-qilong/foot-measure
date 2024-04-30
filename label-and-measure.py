@@ -1,11 +1,11 @@
 # meta info
 mesh_folder = '/Users/knpob/Territory/Kolmo/data/DynaFootLite/Fast'
-mesh_type = 'stl'
+mesh_type = '.obj'
 output_folder = 'output'
 output_name = 'test'
 
-start = 1
-end = 1
+start = 0
+end = 0
 stride = 1
 mesh_fps = 40  # not important
 
