@@ -1,5 +1,6 @@
 # meta info
 mesh_folder = '/Users/knpob/Territory/Kolmo/data/DynaFootLite/Fast'
+mesh_type = 'stl'
 output_folder = 'output'
 output_name = 'test'
 
@@ -24,6 +25,7 @@ landmarks, files = crave.landmarks_labelling(
     end = end,
     stride = stride,
     point_names = [f'P{idx + 1}' for idx in range(12)],
+    file_type = mesh_type,
     use_texture = False,
     export_folder = output_folder,
     export_name = output_name,
