@@ -1,17 +1,18 @@
+# meta info
+mesh_folder = '/Users/knpob/Territory/Kolmo/data/DynaFootLite/Fast'
+output_folder = 'output'
+output_name = 'test'
+
+start = 1
+end = 1
+stride = 1
+mesh_fps = 40  # not important
+
 import numpy as np
 import pandas as pd
 from sklearn.decomposition import PCA
 from mesh4d import obj3d, utils, kps
 from mesh4d.analyse import crave, measure
-
-mesh_folder = '/Users/knpob/Territory/Kolmo/data/DynaFootLite/Fast'
-mesh_fps = 40
-start = 1
-end = 1
-stride = 1
-
-output_folder = 'output'
-output_name = 'test'
 
 ##############################
 # landmarks labelling
