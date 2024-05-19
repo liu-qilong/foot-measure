@@ -42,6 +42,14 @@ def label(
 
     return df
 
+def get_file_ls(df: pd.DataFrame) -> pd.DataFrame:
+    return df.index.get_level_values(0).drop_duplicates()
+
+def get_landmark_ls(df: pd.DataFrame) -> pd.DataFrame:
+    return df.index.get_level_values(1).drop_duplicates()
+
+def slice_landmarks(df: pd.DataFrame, landmark_ls: list) -> pd.DataFrame:
+    return df.loc[pd.IndexSlice[:, landmark_ls], :]
 
 if __name__ == '__main__':
     df = label(
