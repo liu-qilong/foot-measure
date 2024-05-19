@@ -259,4 +259,4 @@ for frame_id in range(len(mesh_fix_ls)):
     cir_ls.append(boundary.length)
 
 df['ABG'] = ['anatomical ball girth'] + cir_ls
-df.to_csv(f'{output_folder}/{output_name}_measurement.csv')
+df.to_csv(f'{output_folder}/{output_name}_measure.csv')
