@@ -52,10 +52,50 @@ def estimate_foot_frame(mesh: pv.core.pointset.PolyData, file: str, df: pd.DataF
     _, axes, _ = pca_axes(mesh.points)
     axes_frame[1] = axes[-1]  # set y-axis
 
-    # use clipped foot to estimate x-axis (frontal direction) and z-axis (vertical direction) as well as local-frame's origin
+    # use clipped foot to estimate x-axis (frontal direction) and z-axis (vertical direction)
     mesh_clip = foot_clip(mesh, df, file, ['P7', 'P11', 'P12'])
-    origin, axes, _ = pca_axes(mesh_clip.points)
+    mean, axes, _ = pca_axes(mesh_clip.points)
     axes_frame[0] = axes[0]  # set x-axis
     axes_frame[2] = np.cross(axes_frame[0], axes_frame[1])  # set z-axis
 
-    return axes_frame, origin
+    # transform mesh to local frame
+    mat2local = trans_mat2local(axes_frame, mean)
+    mat2global = trans_mat2global(axes_frame, mean)
+    mesh_local = mesh.transform(mat2local, inplace=False)
+
+    # set origin as the ground (lowest) point of foot (in local frame)
+    min_idx = mesh_local.points[:, -1].argmin()
+    ground = mesh_local.points[min_idx]
+    origin = transform(mat2global, np.array([ground]))[0]
+
+    return axes_frame, origin, mesh_local
+
+# coordinates operations
+def coord_cart2homo(vertices):
+    shape = list(vertices.shape)
+    shape[1] += 1
+
+    vertices_homo = np.ones(shape)
+    vertices_homo[:, :3] = vertices
+    return vertices_homo
+
+def coord_homo2cart(vertices_homo):
+    return vertices_homo[:, :3] / vertices_homo[:, [-1]]
+
+def trans_mat2global(axes, origin):
+    """e(i) -> a_i + t"""
+    matrix = np.eye(4)
+    matrix[:3, :3] = axes.T
+    matrix[:3, 3] = origin
+    
+    return matrix
+
+def trans_mat2local(axes, origin):
+    """a_i + t -> e(i)"""
+    matrix2golbal = trans_mat2global(axes, origin)
+    return np.linalg.inv(matrix2golbal)
+
+def transform(matrix, vertices):
+    vertices_homo = coord_cart2homo(vertices)
+    vertices_transform = (matrix @ vertices_homo.T).T
+    return coord_homo2cart(vertices_transform)
