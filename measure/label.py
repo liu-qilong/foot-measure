@@ -50,10 +50,18 @@ def get_landmark_ls(df: pd.DataFrame) -> pd.DataFrame:
     return df.index.get_level_values(1).drop_duplicates()
 
 def slice(df: pd.DataFrame, file_ls: list, landmark_ls: list) -> pd.DataFrame:
-    return df.loc[pd.IndexSlice[:, landmark_ls], :]
+    return df.loc[pd.IndexSlice[file_ls, landmark_ls], :]
 
 def coord(df: pd.DataFrame, file: str, landmark: str) -> np.array:
-    return label.slice(df, [file], [landmark]).values
+    return slice(df, file, landmark).values
+
+def axis_coord(df, file, landmark, axis):
+    axis2idx = {
+        'x': 0,
+        'y': 1,
+        'z': 2
+    }
+    return coord(df, file, landmark)[axis2idx[axis]]
 
 if __name__ == '__main__':
     df = label(
