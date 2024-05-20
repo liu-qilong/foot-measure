@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+
 from mesh4d.analyse import crave
 
 def label(
@@ -48,8 +49,11 @@ def get_file_ls(df: pd.DataFrame) -> pd.DataFrame:
 def get_landmark_ls(df: pd.DataFrame) -> pd.DataFrame:
     return df.index.get_level_values(1).drop_duplicates()
 
-def slice_landmarks(df: pd.DataFrame, landmark_ls: list) -> pd.DataFrame:
+def slice(df: pd.DataFrame, file_ls: list, landmark_ls: list) -> pd.DataFrame:
     return df.loc[pd.IndexSlice[:, landmark_ls], :]
+
+def coord(df: pd.DataFrame, file: str, landmark: str) -> np.array:
+    return label.slice(df, [file], [landmark]).values
 
 if __name__ == '__main__':
     df = label(
