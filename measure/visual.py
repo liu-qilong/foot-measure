@@ -1,7 +1,7 @@
 import numpy as np
 import pyvista as pv
 
-from mesh4d.analyse import measure
+from mesh4d.analyse import measure, crave
 from measure import label, metric
 
 # frame related visuals
@@ -162,8 +162,15 @@ def plot_circ_pass_landmark(scene, df_local, file, mesh_local, landmark, norm_ax
 
     for invert in [True, False]:
         mesh_clip = mesh_local.clip(norm, origin=center, invert=invert)
-        boundary = mesh_clip.extract_feature_edges(boundary_edges=True, feature_edges=False, manifold_edges=False)
-        cir_ls.append(boundary.length)
+        boundary = crave.fix_pvmesh_disconnect(
+            mesh_clip.extract_feature_edges(
+                boundary_edges=True, 
+                feature_edges=False, 
+                manifold_edges=False,
+                )
+            )
+        arc = boundary.compute_arc_length()
+        cir_ls.append(sum(arc['arc_length']))
         boundary_ls.append(boundary)
 
     idx = np.argmin(cir_ls)
@@ -198,9 +205,16 @@ def plot_circ_pass_landmarks(scene, df_local, file, mesh_local, landmark_ls, nam
 
     for invert in [True, False]:
         mesh_clip = mesh_local.clip(norm, origin=center, invert=invert)
-        boundary = mesh_clip.extract_feature_edges(boundary_edges=True, feature_edges=False, manifold_edges=False)
+        boundary = crave.fix_pvmesh_disconnect(
+            mesh_clip.extract_feature_edges(
+                boundary_edges=True, 
+                feature_edges=False, 
+                manifold_edges=False,
+                )
+            )
+        arc = boundary.compute_arc_length()
+        cir_ls.append(sum(arc['arc_length']))
         boundary_ls.append(boundary)
-        cir_ls.append(boundary.length)
 
     idx = np.argmin(cir_ls)
     boundary = boundary_ls[idx]

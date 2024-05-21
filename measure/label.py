@@ -65,13 +65,13 @@ def axis_coord(df, file, landmark, axis):
 
 if __name__ == '__main__':
     df = label(
-        mesh_folder = '/Users/knpob/Territory/Kolmo/data/DynaFootLite/Fast',
+        mesh_folder = '/Users/knpob/Territory/Kolmo/code/foot-measure/data',
         start = 0,
-        end = 0,
+        end = 4,
         stride = 1,
         point_names = [f'P{idx + 1}' for idx in range(12)],
         file_type = 'obj',
         use_texture = False,
         export_folder = 'output',
-        export_name = 'label',
+        export_name = 'test',
     )

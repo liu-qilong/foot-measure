@@ -2,8 +2,8 @@ import numpy as np
 import pandas as pd
 import pyvista as pv
 
+from mesh4d.analyse import measure, crave
 from measure import label
-from mesh4d.analyse import measure
 
 # metric types
 def dist_along_axis(
@@ -73,8 +73,15 @@ def circ_pass_landmark(
 
     for invert in [True, False]:
         mesh_clip = mesh_local.clip(norm, origin=center, invert=invert)
-        boundary = mesh_clip.extract_feature_edges(boundary_edges=True, feature_edges=False, manifold_edges=False)
-        cir_ls.append(boundary.length)
+        boundary = crave.fix_pvmesh_disconnect(
+            mesh_clip.extract_feature_edges(
+                boundary_edges=True, 
+                feature_edges=False, 
+                manifold_edges=False,
+                )
+            )
+        arc = boundary.compute_arc_length()
+        cir_ls.append(sum(arc['arc_length']))
 
     return np.array(cir_ls).min()
 
@@ -104,8 +111,15 @@ def circ_pass_landmarks(
 
     for invert in [True, False]:
         mesh_clip = mesh_local.clip(norm, origin=center, invert=invert)
-        boundary = mesh_clip.extract_feature_edges(boundary_edges=True, feature_edges=False, manifold_edges=False)
-        cir_ls.append(boundary.length)
+        boundary = crave.fix_pvmesh_disconnect(
+            mesh_clip.extract_feature_edges(
+                boundary_edges=True, 
+                feature_edges=False, 
+                manifold_edges=False,
+                )
+            )
+        arc = boundary.compute_arc_length()
+        cir_ls.append(sum(arc['arc_length']))
 
     return np.array(cir_ls).min()
 
