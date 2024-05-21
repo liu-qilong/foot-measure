@@ -16,56 +16,6 @@ def pca_axes(vertices):
     mean = pca.mean_ # (n_coords)
     return mean, axes, stds
 
-def draw_pca(mean, axes, stds, mesh, is_export: bool = False, export_path: str = ''):
-    scene = pv.Plotter()
-
-    for i in range(3):
-        start_point = mean
-        end_point = mean + 3 * stds[i] * axes[i]
-        scene.add_lines(np.array([start_point, end_point]), color='goldenrod')
-        scene.add_point_labels(
-            end_point, [f"PC{i + 1}@({axes[i][0]:.2f}, {axes[i][1]:.2f}, {axes[i][2]:.2f})var{stds[i]:.2f}"], 
-            font_size=15, point_size=0, shape='rounded_rect',
-            point_color='goldenrod', always_visible=True,
-            )
-
-    scene.add_mesh(mesh, opacity=0.5)
-    scene.camera_position = 'zy'
-    
-    if is_export:
-        scene.screenshot(export_path)
-    else:
-        scene.show()
-
-def draw_axes(origin, axes, mesh, len=150, names=['X', 'Y', 'Z'], is_export: bool = False, export_path: str = ''):
-    scene = pv.Plotter()
-
-    for i in range(3):
-        start_point = origin
-        end_point = origin + len * axes[i]
-        scene.add_lines(np.array([start_point, end_point]), color='goldenrod')
-        scene.add_point_labels(
-            end_point,
-            [f"{names[i]}@({axes[i][0]:.2f}, {axes[i][1]:.2f}, {axes[i][2]:.2f})"], 
-            font_size=15, point_size=0, shape='rounded_rect',
-            point_color='goldenrod', always_visible=True,
-            )
-    
-    scene.add_point_labels(
-            origin,
-            [f"O@({origin[0]:.2f}, {origin[1]:.2f}, {origin[2]:.2f})"],
-            font_size=15, point_size=0, shape='rounded_rect',
-            point_color='goldenrod', always_visible=True,
-            )
-
-    scene.add_mesh(mesh, opacity=0.5)
-    scene.camera_position = 'zy'
-    
-    if is_export:
-        scene.screenshot(export_path)
-    else:
-        scene.show()
-
 # coordinates operations
 def coord_cart2homo(vertices):
     shape = list(vertices.shape)
