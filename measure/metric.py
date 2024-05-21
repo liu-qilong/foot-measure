@@ -45,11 +45,17 @@ def angle(
         landmark_origin: str,
         landmark1: str,
         landmark2: str,
+        acute_angle: bool = False,
     ) -> float:
     v1 = label.coord(df_local, file, landmark1) - label.coord(df_local, file, landmark_origin)
     v2 = label.coord(df_local, file, landmark2) - label.coord(df_local, file, landmark_origin)
     cos = v1 @ v2 / np.linalg.norm(v1) / np.linalg.norm(v2)
-    return np.arccos(cos) / np.pi * 180
+    a =  np.arccos(cos) / np.pi * 180
+
+    if a >= 90:
+        return 180 - a
+    else:
+        return a
 
 def circ_pass_landmark(
         df_local: pd.DataFrame,
@@ -57,8 +63,8 @@ def circ_pass_landmark(
         mesh_local: pv.core.pointset.PolyData,
         landmark: str,
         norm_axis: np.array,
+        full_return: bool = False,
     ) -> float:
-    """use with caution and check"""
     # estimate circumference plane
     axis2norm = {
         'x': np.array([1, 0, 0]),
@@ -70,6 +76,7 @@ def circ_pass_landmark(
 
     # calculate circumference
     cir_ls = []
+    boundary_ls = []
 
     for invert in [True, False]:
         mesh_clip = mesh_local.clip(norm, origin=center, invert=invert)
@@ -82,17 +89,71 @@ def circ_pass_landmark(
             )
         arc = boundary.compute_arc_length()
         cir_ls.append(sum(arc['arc_length']))
+        boundary_ls.append(boundary)
 
-    return np.array(cir_ls).min()
+    idx = np.argmin(cir_ls)
+    boundary = boundary_ls[idx]
+    cir = cir_ls[idx]
+
+    if full_return:
+        return cir, boundary
+    else:
+        return cir
+
+def circ_pass_2landmarks(
+        df_local: pd.DataFrame,
+        file: str,
+        mesh_local: pv.core.pointset.PolyData,
+        landmark_ls: list,
+        tangent_axis: str,
+        full_return: bool = False,
+    ) -> float:
+    # estimate circumference plane
+    axis2tangent = {
+        'x': np.array([1, 0, 0]),
+        'y': np.array([0, 1, 0]),
+        'z': np.array([0, 0, 1]),
+    }
+
+    points = label.slice(df_local, file, landmark_ls).values
+    link = points[0] - points[1]
+    norm, center = np.cross(link, axis2tangent[tangent_axis]), points[1]
+
+    # calculate circumference
+    cir_ls = []
+    boundary_ls = []
+
+    for invert in [True, False]:
+        mesh_clip = mesh_local.clip(norm, origin=center, invert=invert)
+        boundary = crave.fix_pvmesh_disconnect(
+            mesh_clip.extract_feature_edges(
+                boundary_edges=True, 
+                feature_edges=False, 
+                manifold_edges=False,
+                )
+            )
+        arc = boundary.compute_arc_length()
+        cir_ls.append(sum(arc['arc_length']))
+        boundary_ls.append(boundary)
+
+    idx = np.argmin(cir_ls)
+    boundary = boundary_ls[idx]
+    cir = cir_ls[idx]
+
+    if full_return:
+        return cir, boundary
+    else:
+        return cir
 
 def circ_pass_landmarks(
         df_local: pd.DataFrame,
         file: str,
         mesh_local: pv.core.pointset.PolyData,
         landmark_ls: list,
+        full_return: bool = False,
     ) -> float:
+    """use with caution and check"""
     points = label.slice(df_local, file, landmark_ls).values
-
     path_points_ls = []
 
     for idx in range(len(points) - 1):
@@ -108,6 +169,7 @@ def circ_pass_landmarks(
 
     # calculate circumference
     cir_ls = []
+    boundary_ls = []
 
     for invert in [True, False]:
         mesh_clip = mesh_local.clip(norm, origin=center, invert=invert)
@@ -120,11 +182,16 @@ def circ_pass_landmarks(
             )
         arc = boundary.compute_arc_length()
         cir_ls.append(sum(arc['arc_length']))
+        boundary_ls.append(boundary)
 
-    return np.array(cir_ls).min()
+    idx = np.argmin(cir_ls)
+    boundary = boundary_ls[idx]
+    cir = cir_ls[idx]
 
-# metric visualization
-
+    if full_return:
+        return cir, boundary
+    else:
+        return cir
 
 # foot measurement metrics
 def fl(
@@ -188,36 +255,21 @@ def ba(
         file: str,
     ) -> float:
     """ball angle"""
-    a = angle(df_local, file, 'P4', 'P5', 'P8')
-
-    if a >= 90:
-        return 180 - a
-    else:
-        return a
+    return angle(df_local, file, 'P4', 'P5', 'P8')
 
 def t1a(
         df_local: pd.DataFrame,
         file: str,
     ) -> float:
     """toe 1 angle"""
-    a =  angle(df_local, file, 'P4', 'P2', 'P8')
-
-    if a >= 90:
-        return 180 - a
-    else:
-        return a
+    return  angle(df_local, file, 'P4', 'P2', 'P8')
 
 def t5a(
         df_local: pd.DataFrame,
         file: str,
     ) -> float:
     """toe 5 angle"""
-    a = angle(df_local, file, 'P5', 'P3', 'P9')
-
-    if a >= 90:
-        return 180 - a
-    else:
-        return a
+    return angle(df_local, file, 'P5', 'P3', 'P9')
 
 def abg(
         df_local: pd.DataFrame,
@@ -225,7 +277,7 @@ def abg(
         mesh_local: pv.core.pointset.PolyData,
     ) -> float:
     """anatomical ball girth"""
-    return circ_pass_landmarks(df_local, file, mesh_local, ['P4', 'P5'])
+    return circ_pass_2landmarks(df_local, file, mesh_local, ['P4', 'P5'], 'z')
 
 def ig(
         df_local: pd.DataFrame,

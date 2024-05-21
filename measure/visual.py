@@ -121,8 +121,8 @@ def plot_dist(scene, df_local, file, landmark1, landmark2, name='dist', unit='mm
     scene.add_mesh(pdata, line_width=5, **kwargs)
     scene.add_point_labels([points.mean(axis=0)], [f'{name} = {measurement:.2f} {unit}'], font_size=font_size, always_visible=True)
 
-def plot_angle(scene, df_local, file, landmark_origin, landmark1, landmark2, unit='°', name='angle', font_size=15, **kwargs):
-    measurement = metric.angle(df_local, file, landmark_origin, landmark1, landmark2)
+def plot_angle(scene, df_local, file, landmark_origin, landmark1, landmark2, unit='°', actue_angle=False, name='angle', font_size=15, **kwargs):
+    measurement = metric.angle(df_local, file, landmark_origin, landmark1, landmark2, actue_angle)
 
     points = plot_landmarks(scene, df_local, file, [landmark_origin, landmark1, landmark2], **kwargs)
     pdata = pv.PolyData(points)
@@ -147,81 +147,25 @@ def plot_height(scene, df_local, file, landmark, name='height', unit='mm', font_
     scene.add_point_labels([points.mean(axis=0)], [f'{name} = {measurement:.2f} {unit}'], font_size=font_size, always_visible=True)
 
 def plot_circ_pass_landmark(scene, df_local, file, mesh_local, landmark, norm_axis, name='circ', unit='mm', font_size=15, **kwargs):
-    # estimate circumference plane
-    axis2norm = {
-        'x': np.array([1, 0, 0]),
-        'y': np.array([0, 1, 0]),
-        'z': np.array([0, 0, 1]),
-    }
-
-    norm, center = axis2norm[norm_axis], label.coord(df_local, file, landmark)
-
-    # calculate circumference
-    cir_ls = []
-    boundary_ls = []
-
-    for invert in [True, False]:
-        mesh_clip = mesh_local.clip(norm, origin=center, invert=invert)
-        boundary = crave.fix_pvmesh_disconnect(
-            mesh_clip.extract_feature_edges(
-                boundary_edges=True, 
-                feature_edges=False, 
-                manifold_edges=False,
-                )
-            )
-        arc = boundary.compute_arc_length()
-        cir_ls.append(sum(arc['arc_length']))
-        boundary_ls.append(boundary)
-
-    idx = np.argmin(cir_ls)
-    boundary = boundary_ls[idx]
-    measurement = cir_ls[idx]
+    measurement, boundary = metric.circ_pass_landmark(df_local, file, mesh_local, landmark, norm_axis, full_return=True)
 
     # plot
     plot_landmarks(scene, df_local, file, [landmark], **kwargs)
+    scene.add_mesh(boundary, line_width=5, **kwargs)
+    scene.add_point_labels([boundary.points.mean(axis=0)], [f'{name} = {measurement:.2f} {unit}'], font_size=font_size, always_visible=True)
 
+def plot_circ_pass_2landmarks(scene, df_local, file, mesh_local, landmark_ls, tangent_axis, name='circ', unit='mm', font_size=15, **kwargs):
+    measurement, boundary = metric.circ_pass_2landmarks(df_local, file, mesh_local, landmark_ls, tangent_axis, full_return=True)
+
+    # plot
+    plot_landmarks(scene, df_local, file, landmark_ls, **kwargs)
     scene.add_mesh(boundary, line_width=5, **kwargs)
     scene.add_point_labels([boundary.points.mean(axis=0)], [f'{name} = {measurement:.2f} {unit}'], font_size=font_size, always_visible=True)
 
 def plot_circ_pass_landmarks(scene, df_local, file, mesh_local, landmark_ls, name='circ', unit='mm', font_size=15, **kwargs):
-    points = label.slice(df_local, file, landmark_ls).values
-
-    path_points_ls = []
-
-    for idx in range(len(points) - 1):
-        id1 = mesh_local.find_closest_point(points[idx])
-        id2 = mesh_local.find_closest_point(points[idx + 1])
-        path = mesh_local.geodesic(id1, id2)
-        path_points_ls.append(np.array(path.points))
-
-    path_points = np.concatenate(path_points_ls)
-
-    # estimate circumference plane
-    norm, center = measure.estimate_plane_from_points(path_points)
-
-    # calculate circumference
-    cir_ls = []
-    boundary_ls = []
-
-    for invert in [True, False]:
-        mesh_clip = mesh_local.clip(norm, origin=center, invert=invert)
-        boundary = crave.fix_pvmesh_disconnect(
-            mesh_clip.extract_feature_edges(
-                boundary_edges=True, 
-                feature_edges=False, 
-                manifold_edges=False,
-                )
-            )
-        arc = boundary.compute_arc_length()
-        cir_ls.append(sum(arc['arc_length']))
-        boundary_ls.append(boundary)
-
-    idx = np.argmin(cir_ls)
-    boundary = boundary_ls[idx]
-    measurement = cir_ls[idx]
+    measurement, boundary = metric.circ_pass_landmarks(df_local, file, mesh_local, landmark_ls, full_return=True)
 
     # plot
     plot_landmarks(scene, df_local, file, landmark_ls, **kwargs)
-
     scene.add_mesh(boundary, line_width=5, **kwargs)
     scene.add_point_labels([boundary.points.mean(axis=0)], [f'{name} = {measurement:.2f} {unit}'], font_size=font_size, always_visible=True)
