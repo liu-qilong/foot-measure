@@ -92,47 +92,74 @@ def trans_mat2local(axes, origin):
     return np.linalg.inv(matrix2golbal)
 
 def transform(matrix, vertices):
+    if len(vertices.shape) == 1:
+        # input is only one point of shape (3,)
+        vertices = np.array([vertices])
+        one_point_mode = True
+    else:
+        # input is multiple points of shape (N, 3)
+        one_point_mode = False
+
     vertices_homo = coord_cart2homo(vertices)
     vertices_transform = (matrix @ vertices_homo.T).T
-    return coord_homo2cart(vertices_transform)
+
+    if one_point_mode:
+        # output is only one point of shape (3,)
+        return coord_homo2cart(vertices_transform)[0]
+    else:
+        # output is multiple points of shape (N, 3)
+        return coord_homo2cart(vertices_transform)
 
 # foot local frame
 def foot_clip(
         mesh: pv.core.pointset.PolyData,
         df: pd.DataFrame,
         file: str,
-        clip_landmarks: list = ['P7', 'P10', 'P11', 'P12'],
+        clip_landmarks: list = ['P7', 'P11', 'P12'],
+        margin: float = -10,
+        invert: bool = True,
         ) -> pv.core.pointset.PolyData:
     df_contour = label.slice(df, [file], clip_landmarks)
-    return crave.clip_mesh_with_contour(mesh, df_contour.values, clip_bound='', margin=0, invert=True)
+    return crave.clip_mesh_with_contour(mesh, df_contour.values, clip_bound='', margin=margin, invert=invert)
 
 def estimate_foot_frame(
         mesh: pv.core.pointset.PolyData,
-        file: str, df: pd.DataFrame,
-        clip_landmarks: list = ['P7', 'P10', 'P11', 'P12'],
+        file: str,
+        df: pd.DataFrame,
+        clip_landmarks: list = ['P2', 'P3', 'P4', 'P5', 'P8', 'P9'],
         ):
-    axes_frame = np.zeros((3, 3))  # (axes, coord)
+    def axis_flip_to_align_link(axis, start, end):
+        link = label.coord(df, file, end) - label.coord(df, file, start)
+        cos = (link @ axis) / np.linalg.norm(link) / np.linalg.norm(axis)
+        return np.sign(cos) * axis, np.sign(cos)
     
-    # use whole foot with leg to estimate y-axis (sided direction)
-    _, axes, _ = pca_axes(mesh.points)
-    axes_frame[1] = axes[-1]  # set y-axis
-
-    # use clipped foot to estimate x-axis (frontal direction) and z-axis (vertical direction)
+    # use clipped foot bottom to estimate x-axis (frontal direction)
     mesh_clip = foot_clip(mesh, df, file, clip_landmarks)
-    mean, axes, _ = pca_axes(mesh_clip.points)
-    axes_frame[0] = axes[0]  # set x-axis
-    axes_frame[2] = np.cross(axes_frame[0], axes_frame[1])  # set z-axis
+    origin, axes, _ = pca_axes(mesh_clip.points)
+    x_axis, _ = axis_flip_to_align_link(axes[0], 'P10', 'P1')  # set x-axis (aligned to P10-P1 direction)
+
+    # use whole foot with leg to estimate y-axis (sided direction) and z-axis (vertical direction)
+    _, axes, _ = pca_axes(mesh.points)
+    y_axis = axes[-1]  # set y-axis
+    z_axis, sign = axis_flip_to_align_link(np.cross(x_axis, y_axis), 'P8', 'P11')  # set z-axis (aligned to P8-P11 direction)
+    y_axis = sign * y_axis  # adjust y-axis according to weather z-axis is flipped
+
+    axes_frame = np.array([x_axis, y_axis, z_axis])  # (axes, coord)
 
     # transform mesh to local frame
-    mat2local = trans_mat2local(axes_frame, mean)
-    mat2global = trans_mat2global(axes_frame, mean)
+    mat2local = trans_mat2local(axes_frame, origin)
+    mat2global = trans_mat2global(axes_frame, origin)
     mesh_local = mesh.transform(mat2local, inplace=False)
 
-    # set origin as the ground (lowest) point of foot (in local frame)
+    # estimate ground (lowest) point under local frame
     min_idx = mesh_local.points[:, -1].argmin()
     ground = mesh_local.points[min_idx]
-    origin = transform(mat2global, np.array([ground]))[0]
 
+    # push origin to the ground level
+    origin_local = transform(mat2local, origin)
+    origin_local[2] = ground[2]
+    origin = transform(mat2global, origin_local)
+    
     return axes_frame, origin
 
 def foot2local(mesh: pv.core.pointset.PolyData, axes_frame: np.array, origin: np.array) -> pv.core.pointset.PolyData:

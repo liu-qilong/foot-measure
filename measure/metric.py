@@ -109,6 +109,9 @@ def circ_pass_landmarks(
 
     return np.array(cir_ls).min()
 
+# metric visualization
+
+
 # foot measurement metrics
 def fl(
         df_local: pd.DataFrame,
