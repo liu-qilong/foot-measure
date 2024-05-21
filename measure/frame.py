@@ -3,7 +3,7 @@ import pandas as pd
 import pyvista as pv
 from sklearn.decomposition import PCA
 
-from mesh4d.analyse import crave
+from mesh4d.analyse import crave, measure
 from measure import label
 
 # pca operations
@@ -86,14 +86,10 @@ def estimate_foot_frame(
     # use clipped foot bottom to estimate x-axis (frontal direction)
     mesh_clip = foot_clip(mesh, df, file, clip_landmarks)
     origin, axes, _ = pca_axes(mesh_clip.points)
-    x_axis, _ = axis_flip_to_align_link(axes[0], 'P10', 'P1')  # set x-axis (aligned to P10-P1 direction)
-
-    # use whole foot with leg to estimate y-axis (sided direction) and z-axis (vertical direction)
-    _, axes, _ = pca_axes(mesh.points)
-    y_axis = axes[-1]  # set y-axis
-    z_axis, sign = axis_flip_to_align_link(np.cross(x_axis, y_axis), 'P8', 'P11')  # set z-axis (aligned to P8-P11 direction)
+    x_axis, _ = axis_flip_to_align_link(axes[0], 'P10', 'P1')  # set x-axis as the 1st PC and align it to P10-P1 direction
+    y_axis = axes[1] # set y-axis
+    z_axis, sign = axis_flip_to_align_link(np.cross(x_axis, y_axis), 'P8', 'P11')  # set z-axis and align it to P8-P11 direction
     y_axis = sign * y_axis  # adjust y-axis according to weather z-axis is flipped
-
     axes_frame = np.array([x_axis, y_axis, z_axis])  # (axes, coord)
 
     # transform mesh to local frame
@@ -109,6 +105,7 @@ def estimate_foot_frame(
     origin_local = transform(mat2local, origin)
     origin_local[2] = ground[2]
     origin = transform(mat2global, origin_local)
+    origin = measure.nearest_points_from_plane(mesh, origin)
     
     return axes_frame, origin
 
