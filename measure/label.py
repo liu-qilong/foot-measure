@@ -36,7 +36,12 @@ def label(
     for index, val in np.ndenumerate(arr):
         val_ls.append({'file': files[index[0]], 'landmark': names[index[1]], 'coord': id2xyz[index[2]], 'value': val})
 
-    df = pd.DataFrame(val_ls).pivot(index=('file', 'landmark'), columns='coord', values='value')
+    df = pd.DataFrame(val_ls)
+    
+    try:
+        df = df.pivot(index=('file', 'landmark'), columns='coord', values='value')
+    except:
+        print('WARNING: unable to pivot!')
 
     # export as pkl
     df.to_pickle(f'{export_folder}/{export_name}.pkl')
@@ -72,6 +77,6 @@ if __name__ == '__main__':
         point_names = [f'P{idx + 1}' for idx in range(12)],
         file_type = 'obj',
         use_texture = False,
-        export_folder = 'output',
-        export_name = 'test',
+        export_folder = 'data',
+        export_name = 'label',
     )

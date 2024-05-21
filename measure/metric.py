@@ -188,21 +188,36 @@ def ba(
         file: str,
     ) -> float:
     """ball angle"""
-    return angle(df_local, file, 'P4', 'P5', 'P8')
+    a = angle(df_local, file, 'P4', 'P5', 'P8')
+
+    if a >= 90:
+        return 180 - a
+    else:
+        return a
 
 def t1a(
         df_local: pd.DataFrame,
         file: str,
     ) -> float:
     """toe 1 angle"""
-    return angle(df_local, file, 'P4', 'P2', 'P8')
+    a =  angle(df_local, file, 'P4', 'P2', 'P8')
+
+    if a >= 90:
+        return 180 - a
+    else:
+        return a
 
 def t5a(
         df_local: pd.DataFrame,
         file: str,
     ) -> float:
     """toe 5 angle"""
-    return angle(df_local, file, 'P5', 'P3', 'P9')
+    a = angle(df_local, file, 'P5', 'P3', 'P9')
+
+    if a >= 90:
+        return 180 - a
+    else:
+        return a
 
 def abg(
         df_local: pd.DataFrame,
