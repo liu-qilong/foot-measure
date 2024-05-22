@@ -45,6 +45,7 @@ def label(
 
     # export as pkl
     df.to_pickle(f'{export_folder}/{export_name}.pkl')
+    print(f'landmarks exported to {export_folder}/{export_name}.pkl')
 
     return df
 
