@@ -8,6 +8,7 @@ end = 1
 stride = 1
 
 import os
+from pathlib import Path
 import pandas as pd
 import pyvista as pv
 
@@ -22,7 +23,7 @@ files.sort()
 for idx in range(start, end + 1):
     # landmarks labelling
     file = files[idx]
-    file_name = file.split('/')[-1].replace('.obj', '')
+    file_name = Path(file).stem
 
     df = label.label(
             mesh_folder = mesh_folder,
@@ -84,11 +85,11 @@ for idx in range(start, end + 1):
     )
 
     df_auto = pd.DataFrame(results).set_index('file')
-    df_auto.to_csv(f'{output_folder}/{file_name}.csv')
-    print(f'measurements exported to {output_folder}/{file_name}.csv')
+    df_auto.to_csv(os.path.join(output_folder, f'{file_name}.csv'))
+    print(f'measurements exported to {os.path.join(output_folder, f"{file_name}.csv")}')
 
     # combine all results so far
     df_all = metric.combine_measurement_csv(output_folder)
-    df_all.to_csv(f'{output_folder}/measurements.csv')
-    print(f'combined all measurements to {output_folder}/measurements.csv')
+    df_all.to_csv(os.path.join(output_folder, 'measurements.csv'))
+    print(f'combined all measurements to {os.path.join(output_folder, "measurements.csv")}')
     print("-"*20)
