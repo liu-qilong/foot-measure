@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pandas as pd
 import pyvista as pv
@@ -286,3 +287,18 @@ def ig(
     ) -> float:
     """instep girth"""
     return circ_pass_landmark(df_local, file, mesh_local, 'P6', 'x')
+
+# result operations
+def combine_measurement_csv(folder):
+    files = os.listdir(folder)
+    files = [os.path.join(folder, f) for f in files if '.csv' in f]
+    files.sort()
+
+    df_ls = []
+
+    for file in files:
+        df = pd.read_csv(file)
+        df_ls.append(df)
+
+    df = pd.concat(df_ls).set_index('file')
+    return df[~df.index.duplicated(keep='first')]

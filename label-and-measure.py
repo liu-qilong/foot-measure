@@ -86,4 +86,9 @@ for idx in range(start, end + 1):
     df_auto = pd.DataFrame(results).set_index('file')
     df_auto.to_csv(f'{output_folder}/{file_name}.csv')
     print(f'measurements exported to {output_folder}/{file_name}.csv')
+
+    # combine all results so far
+    df_all = metric.combine_measurement_csv(output_folder)
+    df_all.to_csv(f'{output_folder}/measurements.csv')
+    print(f'combined all measurements to {output_folder}/measurements.csv')
     print("-"*20)
