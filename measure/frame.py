@@ -86,7 +86,7 @@ def foot_clip(
         df: pd.DataFrame,
         file: str,
         clip_landmarks: list = ['P7', 'P11', 'P12'],
-        margin: float = -10,
+        margin: float = 0,
         ) -> pv.core.pointset.PolyData:
     # estimate clipping plane
     df_contour = label.slice(df, [file], clip_landmarks)
