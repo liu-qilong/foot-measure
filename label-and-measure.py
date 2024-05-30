@@ -1,6 +1,6 @@
 # meta info
-mesh_folder = '/Users/knpob/Territory/Kolmo/data/DynaFootLite/Fast'
-mesh_type = '.obj'
+mesh_folder = '/Users/knpob/Territory/Kolmo/code/foot-measure/data/stl'
+mesh_type = '.stl'
 output_folder = mesh_folder
 # output_folder = 'output'
 start = None
@@ -13,7 +13,7 @@ import pandas as pd
 import pyvista as pv
 
 from mesh4d.analyse import crave
-from measure import label, frame, metric
+from measure import label, frame, metric, visual
 
 # get file list
 files = os.listdir(mesh_folder)
@@ -24,9 +24,9 @@ if start == None:
     start = 0
 
 if end == None:
-    end = len(files)
+    end = len(files) - 1
 
-for idx in range(start, end):
+for idx in range(start, end + 1, stride):
     # landmarks labelling
     file = files[idx]
     file_name = Path(file).stem
@@ -70,6 +70,9 @@ for idx in range(start, end):
     mesh_local = frame.foot2local(mesh_clip, axes_frame, origin)
     df_local = frame.df2local(df, axes_frame, origin)
 
+    # visual check
+    visual.plot_axes(origin, axes_frame, mesh_clip)
+
     # metrics
     results.append(
         {
@@ -92,10 +95,10 @@ for idx in range(start, end):
 
     df_auto = pd.DataFrame(results).set_index('file')
     df_auto.to_csv(os.path.join(output_folder, f'{file_name}.csv'))
-    print(f'measurements exported to {os.path.join(output_folder, f"{file_name}.csv")}')
+    print(f'measurements exported to {Path(output_folder)/f"{file_name}.csv"}')
 
     # combine all results so far
     df_all = metric.combine_measurement_csv(output_folder)
     df_all.to_csv(os.path.join(output_folder, 'measurements.csv'))
-    print(f'combined all measurements to {os.path.join(output_folder, "measurements.csv")}')
+    print(f'combined all measurements to {Path(output_folder)/"measurements.csv"}')
     print("-"*20)

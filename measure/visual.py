@@ -22,6 +22,7 @@ def plot_pca(mean, axes, stds, mesh, is_export: bool = False, export_path: str =
     scene.camera_position = 'zy'
     
     if is_export:
+        scene.show()
         scene.screenshot(export_path)
     else:
         scene.show()
@@ -51,6 +52,7 @@ def plot_axes(origin, axes, mesh, len=150, names=['X', 'Y', 'Z'], is_export: boo
     scene.camera_position = 'zy'
     
     if is_export:
+        scene.show()
         scene.screenshot(export_path)
     else:
         scene.show()
