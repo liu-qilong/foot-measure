@@ -15,11 +15,6 @@ import pyvista as pv
 from mesh4d.analyse import crave
 from measure import label, frame, metric
 
-if mesh_type == '.obj':
-    invert = True
-else:
-    invert = False
-
 # get file list
 files = os.listdir(mesh_folder)
 files = [os.path.join(mesh_folder, f) for f in files if mesh_type in f]
@@ -70,8 +65,8 @@ for idx in range(start, end):
 
     # local frame
     mesh = crave.fix_pvmesh_disconnect(pv.read(file))
-    axes_frame, origin = frame.estimate_foot_frame(mesh, file, df, invert=invert)
-    mesh_clip = frame.foot_clip(mesh, df, file, invert=invert)
+    axes_frame, origin = frame.estimate_foot_frame(mesh, file, df)
+    mesh_clip = frame.foot_clip(mesh, df, file)
     mesh_local = frame.foot2local(mesh_clip, axes_frame, origin)
     df_local = frame.df2local(df, axes_frame, origin)
 
