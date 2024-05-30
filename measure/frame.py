@@ -77,6 +77,7 @@ def estimate_foot_frame(
         file: str,
         df: pd.DataFrame,
         clip_landmarks: list = ['P2', 'P3', 'P4', 'P5', 'P8', 'P9'],
+        **kwargs
         ):
     def axis_flip_to_align_link(axis, start, end):
         link = label.coord(df, file, end) - label.coord(df, file, start)
@@ -84,7 +85,7 @@ def estimate_foot_frame(
         return np.sign(cos) * axis, np.sign(cos)
     
     # use clipped foot bottom to estimate x-axis (frontal direction)
-    mesh_clip = foot_clip(mesh, df, file, clip_landmarks)
+    mesh_clip = foot_clip(mesh, df, file, clip_landmarks, **kwargs)
     origin, axes, _ = pca_axes(mesh_clip.points)
     x_axis, _ = axis_flip_to_align_link(axes[0], 'P10', 'P1')  # set x-axis as the 1st PC and align it to P10-P1 direction
     y_axis = axes[1] # set y-axis

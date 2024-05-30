@@ -3,8 +3,8 @@ mesh_folder = '/Users/knpob/Territory/Kolmo/data/DynaFootLite/Fast'
 mesh_type = '.obj'
 output_folder = mesh_folder
 # output_folder = 'output'
-start = 0
-end = 1
+start = None
+end = None
 stride = 1
 
 import os
@@ -15,12 +15,23 @@ import pyvista as pv
 from mesh4d.analyse import crave
 from measure import label, frame, metric
 
+if mesh_type == '.obj':
+    invert = True
+else:
+    invert = False
+
 # get file list
 files = os.listdir(mesh_folder)
 files = [os.path.join(mesh_folder, f) for f in files if mesh_type in f]
 files.sort()
 
-for idx in range(start, end + 1):
+if start == None:
+    start = 0
+
+if end == None:
+    end = len(files)
+
+for idx in range(start, end):
     # landmarks labelling
     file = files[idx]
     file_name = Path(file).stem
@@ -59,8 +70,8 @@ for idx in range(start, end + 1):
 
     # local frame
     mesh = crave.fix_pvmesh_disconnect(pv.read(file))
-    axes_frame, origin = frame.estimate_foot_frame(mesh, file, df)
-    mesh_clip = frame.foot_clip(mesh, df, file)
+    axes_frame, origin = frame.estimate_foot_frame(mesh, file, df, invert=invert)
+    mesh_clip = frame.foot_clip(mesh, df, file, invert=invert)
     mesh_local = frame.foot2local(mesh_clip, axes_frame, origin)
     df_local = frame.df2local(df, axes_frame, origin)
 

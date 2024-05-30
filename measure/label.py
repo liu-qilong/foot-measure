@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pandas as pd
 
@@ -5,8 +6,8 @@ from mesh4d.analyse import crave
 
 def label(
         mesh_folder: str,
-        start: int = 0,
-        end: int = 0,
+        start: int = None,
+        end: int = None,
         stride: int = 1,
         point_names: str = None,
         file_type: str = 'obj',
@@ -44,8 +45,8 @@ def label(
         print('WARNING: unable to pivot!')
 
     # export as pkl
-    df.to_pickle(f'{export_folder}/{export_name}.pkl')
-    print(f'landmarks exported to {export_folder}/{export_name}.pkl')
+    df.to_pickle(os.path.join(export_folder, f'{export_name}.pkl'))
+    print(f'landmarks exported to {os.path.join(export_folder, f"{export_name}.pkl")}')
 
     return df
 
@@ -71,13 +72,13 @@ def axis_coord(df, file, landmark, axis):
 
 if __name__ == '__main__':
     df = label(
-        mesh_folder = '/Users/knpob/Territory/Kolmo/code/foot-measure/data',
-        start = 0,
-        end = 4,
+        mesh_folder = '/Users/knpob/Territory/Kolmo/code/foot-measure/data/stl',
+        start = None,
+        end = None,
         stride = 1,
         point_names = [f'P{idx + 1}' for idx in range(12)],
         file_type = 'obj',
         use_texture = False,
-        export_folder = 'data',
+        export_folder = 'output',
         export_name = 'label',
     )
