@@ -58,8 +58,8 @@ def plot_axes(origin, axes, mesh, len=150, names=['X', 'Y', 'Z'], is_export: boo
         scene.show()
 
 # metric types related visuals
-def plot_landmarks(scene, df_local, file, landamark_ls, font_size=15, **kwargs):
-    points = label.slice(df_local, file, landamark_ls).values
+def plot_landmarks(scene, df_local, landamark_ls, font_size=15, **kwargs):
+    points = label.slice(df_local, landamark_ls).values
     scene.add_points(points, render_points_as_spheres=True, point_size=10, **kwargs)
 
     offset = np.array([5, 5, 5])
@@ -67,14 +67,14 @@ def plot_landmarks(scene, df_local, file, landamark_ls, font_size=15, **kwargs):
 
     return points
 
-def plot_dist_along_axis(scene, df_local, file, landmark1, landmark2, axis, name='dist', unit='mm', font_size=15, **kwargs):
-    measurement = metric.dist_along_axis(df_local, file, landmark1, landmark2, axis)
-    landmark_points = plot_landmarks(scene, df_local, file, [landmark1, landmark2], font_size, **kwargs)
+def plot_dist_along_axis(scene, df_local, landmark1, landmark2, axis, name='dist', unit='mm', font_size=15, **kwargs):
+    measurement = metric.dist_along_axis(df_local, landmark1, landmark2, axis)
+    landmark_points = plot_landmarks(scene, df_local, [landmark1, landmark2], font_size, **kwargs)
 
     # plot axis frame
-    dx = metric.dist_along_axis(df_local, file, landmark1, landmark2, 'x', is_abs=False)
-    dy = metric.dist_along_axis(df_local, file, landmark1, landmark2, 'y', is_abs=False)
-    dz = metric.dist_along_axis(df_local, file, landmark1, landmark2, 'z', is_abs=False)
+    dx = metric.dist_along_axis(df_local, landmark1, landmark2, 'x', is_abs=False)
+    dy = metric.dist_along_axis(df_local, landmark1, landmark2, 'y', is_abs=False)
+    dz = metric.dist_along_axis(df_local, landmark1, landmark2, 'z', is_abs=False)
 
     points = np.vstack([
         landmark_points[1],
@@ -112,10 +112,10 @@ def plot_dist_along_axis(scene, df_local, file, landmark1, landmark2, axis, name
     pdata.lines = np.hstack([[2, 0, 1]])
     scene.add_mesh(pdata, line_width=5, **kwargs)
 
-def plot_dist(scene, df_local, file, landmark1, landmark2, name='dist', unit='mm', font_size=15, **kwargs):
-    measurement = metric.dist(df_local, file, landmark1, landmark2)
+def plot_dist(scene, df_local, landmark1, landmark2, name='dist', unit='mm', font_size=15, **kwargs):
+    measurement = metric.dist(df_local, landmark1, landmark2)
     
-    points = plot_landmarks(scene, df_local, file, [landmark1, landmark2], font_size, **kwargs)
+    points = plot_landmarks(scene, df_local, [landmark1, landmark2], font_size, **kwargs)
     lines = np.hstack([[2, 0, 1]])
     pdata = pv.PolyData(points)
     pdata.lines = lines
@@ -123,20 +123,20 @@ def plot_dist(scene, df_local, file, landmark1, landmark2, name='dist', unit='mm
     scene.add_mesh(pdata, line_width=5, **kwargs)
     scene.add_point_labels([points.mean(axis=0)], [f'{name} = {measurement:.2f} {unit}'], font_size=font_size, always_visible=True)
 
-def plot_angle(scene, df_local, file, landmark_origin, landmark1, landmark2, unit='°', actue_angle=False, name='angle', font_size=15, **kwargs):
-    measurement = metric.angle(df_local, file, landmark_origin, landmark1, landmark2, actue_angle)
+def plot_angle(scene, df_local, landmark_origin, landmark1, landmark2, unit='°', actue_angle=False, name='angle', font_size=15, **kwargs):
+    measurement = metric.angle(df_local, landmark_origin, landmark1, landmark2, actue_angle)
 
-    points = plot_landmarks(scene, df_local, file, [landmark_origin, landmark1, landmark2], **kwargs)
+    points = plot_landmarks(scene, df_local, [landmark_origin, landmark1, landmark2], **kwargs)
     pdata = pv.PolyData(points)
     pdata.lines = np.hstack([[2, 0, 1], [2, 0, 2]])
 
     scene.add_mesh(pdata, line_width=3, **kwargs)
     scene.add_point_labels(points.mean(axis=0), [f'{name} = {measurement:.2f}{unit}'], font_size=font_size, always_visible=True)
 
-def plot_height(scene, df_local, file, landmark, name='height', unit='mm', font_size=15, **kwargs):
-    measurement = metric.height(df_local, file, landmark)
+def plot_height(scene, df_local, landmark, name='height', unit='mm', font_size=15, **kwargs):
+    measurement = metric.height(df_local, landmark)
 
-    point = plot_landmarks(scene, df_local, file, [landmark], **kwargs)[0]
+    point = plot_landmarks(scene, df_local, [landmark], **kwargs)[0]
     ground = np.copy(point)
     ground[2] = 0
     points = np.array([point, ground])
@@ -148,26 +148,26 @@ def plot_height(scene, df_local, file, landmark, name='height', unit='mm', font_
     scene.add_mesh(pdata, line_width=5, **kwargs)
     scene.add_point_labels([points.mean(axis=0)], [f'{name} = {measurement:.2f} {unit}'], font_size=font_size, always_visible=True)
 
-def plot_circ_pass_landmark(scene, df_local, file, mesh_local, landmark, norm_axis, name='circ', unit='mm', font_size=15, **kwargs):
-    measurement, boundary = metric.circ_pass_landmark(df_local, file, mesh_local, landmark, norm_axis, full_return=True)
+def plot_circ_pass_landmark(scene, df_local, mesh_local, landmark, norm_axis, name='circ', unit='mm', font_size=15, **kwargs):
+    measurement, boundary = metric.circ_pass_landmark(df_local, mesh_local, landmark, norm_axis, full_return=True)
 
     # plot
-    plot_landmarks(scene, df_local, file, [landmark], **kwargs)
+    plot_landmarks(scene, df_local, [landmark], **kwargs)
     scene.add_mesh(boundary, line_width=5, **kwargs)
     scene.add_point_labels([boundary.points.mean(axis=0)], [f'{name} = {measurement:.2f} {unit}'], font_size=font_size, always_visible=True)
 
-def plot_circ_pass_2landmarks(scene, df_local, file, mesh_local, landmark_ls, tangent_axis, name='circ', unit='mm', font_size=15, **kwargs):
-    measurement, boundary = metric.circ_pass_2landmarks(df_local, file, mesh_local, landmark_ls, tangent_axis, full_return=True)
+def plot_circ_pass_2landmarks(scene, df_local, mesh_local, landmark_ls, tangent_axis, name='circ', unit='mm', font_size=15, **kwargs):
+    measurement, boundary = metric.circ_pass_2landmarks(df_local, mesh_local, landmark_ls, tangent_axis, full_return=True)
 
     # plot
-    plot_landmarks(scene, df_local, file, landmark_ls, **kwargs)
+    plot_landmarks(scene, df_local, landmark_ls, **kwargs)
     scene.add_mesh(boundary, line_width=5, **kwargs)
     scene.add_point_labels([boundary.points.mean(axis=0)], [f'{name} = {measurement:.2f} {unit}'], font_size=font_size, always_visible=True)
 
-def plot_circ_pass_landmarks(scene, df_local, file, mesh_local, landmark_ls, name='circ', unit='mm', font_size=15, **kwargs):
-    measurement, boundary = metric.circ_pass_landmarks(df_local, file, mesh_local, landmark_ls, full_return=True)
+def plot_circ_pass_landmarks(scene, df_local, mesh_local, landmark_ls, name='circ', unit='mm', font_size=15, **kwargs):
+    measurement, boundary = metric.circ_pass_landmarks(df_local, mesh_local, landmark_ls, full_return=True)
 
     # plot
-    plot_landmarks(scene, df_local, file, landmark_ls, **kwargs)
+    plot_landmarks(scene, df_local, landmark_ls, **kwargs)
     scene.add_mesh(boundary, line_width=5, **kwargs)
     scene.add_point_labels([boundary.points.mean(axis=0)], [f'{name} = {measurement:.2f} {unit}'], font_size=font_size, always_visible=True)

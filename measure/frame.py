@@ -64,16 +64,15 @@ def transform(matrix, vertices):
 def plantar_clip(
     mesh: pv.core.pointset.PolyData,
     df: pd.DataFrame,
-    file: str,
     clip_landmarks: list = ['P2', 'P3', 'P4', 'P5', 'P8', 'P9'],
     margin: float = 0,
     ) -> pv.core.pointset.PolyData:
     # estimate clipping plane
-    df_contour = label.slice(df, [file], clip_landmarks)
+    df_contour = label.slice(df, clip_landmarks)
     norm, center = measure.estimate_plane_from_points(df_contour.values)
 
     # estimate cos<norm, po-p6>
-    pop6 = label.coord(df, file, 'P6') - center
+    pop6 = label.coord(df, 'P6') - center
     cos = pop6 @ norm / np.linalg.norm(pop6) / np.linalg.norm(norm)
 
     # when cos > 0, then p6 is on the norm side of the plan
@@ -84,16 +83,15 @@ def plantar_clip(
 def foot_clip(
         mesh: pv.core.pointset.PolyData,
         df: pd.DataFrame,
-        file: str,
         clip_landmarks: list = ['P7', 'P11', 'P12'],
         margin: float = 0,
         ) -> pv.core.pointset.PolyData:
     # estimate clipping plane
-    df_contour = label.slice(df, [file], clip_landmarks)
+    df_contour = label.slice(df, clip_landmarks)
     norm, center = measure.estimate_plane_from_points(df_contour.values)
 
     # estimate cos<norm, po-p6>
-    pop6 = label.coord(df, file, 'P6') - center
+    pop6 = label.coord(df, 'P6') - center
     cos = pop6 @ norm / np.linalg.norm(pop6) / np.linalg.norm(norm)
 
     # when cos > 0, then p6 is on the norm side of the plan
@@ -103,18 +101,17 @@ def foot_clip(
 
 def estimate_foot_frame(
         mesh: pv.core.pointset.PolyData,
-        file: str,
         df: pd.DataFrame,
         clip_landmarks: list = ['P2', 'P3', 'P4', 'P5', 'P8', 'P9'],
         **kwargs
         ):
     def axis_flip_to_align_link(axis, start, end):
-        link = label.coord(df, file, end) - label.coord(df, file, start)
+        link = label.coord(df, end) - label.coord(df, start)
         cos = (link @ axis) / np.linalg.norm(link) / np.linalg.norm(axis)
         return np.sign(cos) * axis, np.sign(cos)
     
     # use clipped foot bottom to estimate x-axis (frontal direction)
-    mesh_clip = plantar_clip(mesh, df, file, clip_landmarks, **kwargs)
+    mesh_clip = plantar_clip(mesh, df, clip_landmarks, **kwargs)
     origin, axes, _ = pca_axes(mesh_clip.points)
     x_axis, _ = axis_flip_to_align_link(axes[0], 'P10', 'P1')  # set x-axis as the 1st PC and align it to P10-P1 direction
     y_axis = axes[1] # set y-axis
