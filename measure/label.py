@@ -40,7 +40,7 @@ def label(
         print('WARNING: unable to pivot!')
 
     # export as pkl
-    export_path = export_folder / export_name.with_suffix('.pkl')
+    export_path = export_folder / f'{export_name}.pkl'
     df.to_pickle(export_path)
     print(f'landmarks exported to {export_path}')
 
@@ -66,9 +66,9 @@ def axis_coord(df, landmark, axis):
 
 if __name__ == '__main__':
     df = label(
-        file='data/stl/020_l.stl',
+        file='/Users/knpob/Territory/Kolmo/code/foot-measure/data/discontinued/Sub_109_Static_R_025_035.000008.obj',
         point_names = [f'P{idx + 1}' for idx in range(12)],
         use_texture = False,
         # export_folder = 'output',
-        export_name = 'test',
+        # export_name = 'test',
     )

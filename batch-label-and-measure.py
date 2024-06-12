@@ -55,7 +55,7 @@ for idx in range(start, end + 1, stride):
     ]
 
     # local frame
-    mesh = crave.fix_pvmesh_disconnect(pv.read(file))
+    mesh = crave.fix_pvmesh_disconnect(pv.read(file), df.values)
     axes_frame, origin = frame.estimate_foot_frame(mesh, df)
     mesh_clip = frame.foot_clip(mesh, df)
     mesh_local = frame.foot2local(mesh_clip, axes_frame, origin)
