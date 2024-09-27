@@ -1,8 +1,8 @@
 # meta info
 mesh_folder = '/Users/knpob/Territory/Kolmo/code/foot-measure/data/stl'
 mesh_type = '.stl'
-output_folder = mesh_folder
-# output_folder = 'output'
+# output_folder = mesh_folder
+output_folder = 'output'
 start = None
 end = None
 stride = 1
