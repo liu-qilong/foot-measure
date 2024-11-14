@@ -49,7 +49,7 @@ def angle(
     cos = v1 @ v2 / np.linalg.norm(v1) / np.linalg.norm(v2)
     a =  np.arccos(cos) / np.pi * 180
 
-    if a >= 90:
+    if acute_angle and a >= 90:
         return 180 - a
     else:
         return a
@@ -240,19 +240,19 @@ def ba(
         df_local: pd.DataFrame,
     ) -> float:
     """ball angle"""
-    return angle(df_local, 'P4', 'P5', 'P8')
+    return angle(df_local, 'P4', 'P5', 'P8', acute_angle=True)
 
 def t1a(
         df_local: pd.DataFrame,
     ) -> float:
     """toe 1 angle"""
-    return  angle(df_local, 'P4', 'P2', 'P8')
+    return  angle(df_local, 'P4', 'P2', 'P8', acute_angle=True)
 
 def t5a(
         df_local: pd.DataFrame,
     ) -> float:
     """toe 5 angle"""
-    return angle(df_local, 'P5', 'P3', 'P9')
+    return angle(df_local, 'P5', 'P3', 'P9', acute_angle=True)
 
 def abg(
         df_local: pd.DataFrame,

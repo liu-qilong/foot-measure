@@ -34,26 +34,6 @@ for idx in range(start, end + 1, stride):
             use_texture = False,
         )
 
-    # measurement
-    results = [
-        {
-            'file': 'description',
-            'FL': 'foot length (mm)',
-            'MBL': 'medial ball length (mm)',
-            'LBL': 'lateral ball length (mm)',
-            'ABW': 'anatomical ball width (mm)',
-            'OBW': 'orthogonal ball width (mm)',
-            'OHW': 'orthogonal heel width (mm)',
-            'BH': 'ball heigh (mm)',
-            'IH': 'instep height (mm)',
-            'BA': 'ball angle (°)',
-            'T1A': 'toe 1 angle (°)',
-            'T5A': 'toe 5 angle (°)',
-            'ABG': 'anatomical ball girth (mm)',
-            'IG': 'instep girth (mm)',
-        }
-    ]
-
     # local frame
     mesh = crave.fix_pvmesh_disconnect(pv.read(file), df.values)
     axes_frame, origin = frame.estimate_foot_frame(mesh, df)
@@ -65,24 +45,22 @@ for idx in range(start, end + 1, stride):
     visual.plot_axes(origin, axes_frame, mesh_clip)
 
     # metrics
-    results.append(
-        {
-            'file': str(file),
-            'FL': metric.fl(df_local),
-            'MBL': metric.mbl(df_local),
-            'LBL': metric.lbl(df_local),
-            'ABW': metric.abw(df_local),
-            'OBW': metric.obw(df_local),
-            'OHW': metric.ohw(df_local),
-            'BH': metric.bh(df_local),
-            'IH': metric.ih(df_local),
-            'BA': metric.ba(df_local),
-            'T1A': metric.t1a(df_local),
-            'T5A': metric.t5a(df_local),
-            'ABG': metric.abg(df_local, mesh_local),
-            'IG': metric.ig(df_local, mesh_local),
-        }
-    )
+    results = {
+        'file': ['description', str(file)],
+        'FL': ['foot length (mm)', metric.fl(df_local)],
+        'MBL': ['medial ball length (mm)', metric.mbl(df_local)],
+        'LBL': ['lateral ball length (mm)', metric.lbl(df_local)],
+        'ABW': ['anatomical ball width (mm)', metric.abw(df_local)],
+        'OBW': ['orthogonal ball width (mm)', metric.obw(df_local)],
+        'OHW': ['orthogonal heel width (mm)', metric.ohw(df_local)],
+        'BH': ['ball heigh (mm)', metric.bh(df_local)],
+        'IH': ['instep height (mm)', metric.ih(df_local)],
+        'BA': ['ball angle (°)', metric.ba(df_local)],
+        'T1A': ['toe 1 angle (°)', metric.t1a(df_local)],
+        'T5A': ['toe 5 angle (°)', metric.t5a(df_local)],
+        'ABG': ['anatomical ball girth (mm)', metric.abg(df_local, mesh_local)],
+        'IG': ['instep girth (mm)', metric.ig(df_local, mesh_local)],
+    }
     
     file_name = file.stem
     df_auto = pd.DataFrame(results).set_index('file')
