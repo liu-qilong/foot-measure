@@ -269,9 +269,14 @@ def ig(
     return circ_pass_landmark(df_local, mesh_local, 'P6', 'x')
 
 # result operations
-def combine_measurement_csv(folder, match_str: str = ''):
+def combine_measurement_csv(folder, match_str: str = '', exclude_str: str = 'measurement',):
     files = os.listdir(folder)
-    files = [os.path.join(folder, f) for f in files if '.csv' in f if match_str in f]
+    files = [os.path.join(folder, f)
+        for f in files
+        if '.csv' in f
+        if match_str in f
+        if exclude_str not in f
+    ]
     files.sort()
 
     df_ls = []
