@@ -97,7 +97,7 @@ for idx in range(START, END + 1, STRIDE):
 
     # combine all results so far
     df_all = metric.combine_measurement_csv(OUTPUT_FOLDER)
-    output_path = Path(OUTPUT_FOLDER)/"measurements-{EXTRA_MARK}.csv"
+    output_path = Path(OUTPUT_FOLDER)/f"measurements-{EXTRA_MARK}.csv"
     df_all.to_csv(output_path)
     print(f'combined all measurements to {output_path}')
     print("-"*20)
