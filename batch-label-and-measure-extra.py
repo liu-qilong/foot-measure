@@ -104,4 +104,3 @@ for idx in range(START, END + 1, STRIDE):
     output_path = Path(OUTPUT_FOLDER)/f"measurements-{EXTRA_MARK}.csv"
     df_all.to_csv(output_path)
     print(f'combined all measurements to {output_path}')
-    print("-"*20)
