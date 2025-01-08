@@ -3,8 +3,8 @@
 MESH_FOLDER = 'data/olivia/Flat feet'
 MESH_TYPE = '.stl'
 # MESH_TYPE = '.obj'
-# OUTPUT_FOLDER = MESH_FOLDER
-OUTPUT_FOLDER = 'output'
+OUTPUT_FOLDER = MESH_FOLDER
+# OUTPUT_FOLDER = 'output'
 EXTRA_MARK = 'extra'
 POINT_NAMES = ['MLA-AP', 'MLA-PP', 'MMB', 'LMB', 'AA']
 START = None
@@ -91,11 +91,13 @@ for idx in range(START, END + 1, STRIDE):
     
     file_name = file.stem
     df_auto = pd.DataFrame(results).set_index('file')
-    df_auto.to_csv(os.path.join(OUTPUT_FOLDER, f'{file_name}.csv')) # <-- editing
-    print(f'measurements exported to {Path(OUTPUT_FOLDER)/f"{file_name}-{EXTRA_MARK}.csv"}')
+    output_path = Path(OUTPUT_FOLDER)/f"{file_name}-{EXTRA_MARK}.csv"
+    df_auto.to_csv(output_path)
+    print(f'measurements exported to {output_path}')
 
     # combine all results so far
     df_all = metric.combine_measurement_csv(OUTPUT_FOLDER)
-    df_all.to_csv(os.path.join(OUTPUT_FOLDER, f'measurements-{EXTRA_MARK}.csv'))
-    print(f'combined all measurements to {Path(OUTPUT_FOLDER)/"measurements.csv"}')
+    output_path = Path(OUTPUT_FOLDER)/"measurements-{EXTRA_MARK}.csv"
+    df_all.to_csv(output_path)
+    print(f'combined all measurements to {output_path}')
     print("-"*20)
